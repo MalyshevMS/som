@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "core/config/settings.h"
+#include "core/launcher/versionmanager.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -15,9 +16,13 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void loadVersions();
+
 private:
     Ui::MainWindow *ui;
     Settings m_settings;
+    VersionManager m_versionManager;
 };
 
 #endif // MAINWINDOW_H

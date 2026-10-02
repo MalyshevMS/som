@@ -5,7 +5,7 @@
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
-    QCoreApplication::setOrganizationName("SOM");
+    QCoreApplication::setOrganizationName("ЦИНЬ");
     QCoreApplication::setApplicationName("SOM");
 
     MainWindow w;

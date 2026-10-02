@@ -21,11 +21,13 @@ find_package(Qt6 REQUIRED COMPONENTS
     Concurrent
 )
 
-# Выносим исходный код
 set(CORE_SOURCES
     src/core/config/settings.h
     src/core/config/settings.cpp
-    # Сюда позже добавим клиенты API, downloader и запуск
+    src/core/downloader/downloader.h
+    src/core/downloader/downloader.cpp
+    src/core/launcher/versionmanager.h
+    src/core/launcher/versionmanager.cpp
 )
 
 set(UI_SOURCES
@@ -52,7 +54,6 @@ target_link_libraries(som PRIVATE
     Qt6::Concurrent
 )
 
-# Для Windows убираем консольное окно при релизе
 if(WIN32 AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     set_target_properties(som PROPERTIES
         WIN32_EXECUTABLE ON
