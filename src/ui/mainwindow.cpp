@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "core/launcher/gamelauncher.h"
 #include <QFileDialog>
 #include <QMessageBox>
 
@@ -16,6 +17,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->spinHeight->setValue(m_settings.windowHeight());
     ui->editJavaPath->setText(m_settings.javaPath());
     ui->editGameDir->setText(m_settings.gameDirectory());
+    ui->chkShowSnapshots->setChecked(m_settings.showSnapshots());
+    ui->chkShowBetas->setChecked(m_settings.showBetas());
+    ui->chkShowAlphas->setChecked(m_settings.showAlphas());
 
     connect(ui->btnBrowseJava, &QPushButton::clicked, this, [this]() {
         QString path = QFileDialog::getOpenFileName(this, "Выберите файл Java");
@@ -38,14 +42,31 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     connect(&m_versionManager, &VersionManager::manifestLoaded, this, [this](const QList<VersionInfo> &versions) {
+        QString previousSelection = ui->comboVersions->currentData().toString();
+        if (previousSelection.isEmpty()) {
+            previousSelection = m_settings.selectedVersion();
+        }
+
         ui->comboVersions->clear();
         for (const auto &ver : versions) {
-            if (ver.type == "release") {
-                ui->comboVersions->addItem(ver.id, ver.url);
-            } else {
-                ui->comboVersions->addItem(QString("%1 (%2)").arg(ver.id, ver.type), ver.url);
+            bool show = false;
+            if (ver.type == "release") show = true;
+            else if (ver.type == "snapshot" && ui->chkShowSnapshots->isChecked()) show = true;
+            else if (ver.type == "old_beta" && ui->chkShowBetas->isChecked()) show = true;
+            else if (ver.type == "old_alpha" && ui->chkShowAlphas->isChecked()) show = true;
+
+            if (show) {
+                QString label = (ver.type == "release") ? ver.id : QString("%1 (%2)").arg(ver.id, ver.type);
+                ui->comboVersions->addItem(label, ver.id);
+                ui->comboVersions->setItemData(ui->comboVersions->count() - 1, ver.url, Qt::UserRole + 1);
             }
         }
+
+        int index = ui->comboVersions->findData(previousSelection);
+        if (index != -1) {
+            ui->comboVersions->setCurrentIndex(index);
+        }
+
         ui->lblStatus->setText("Список версий обновлен");
         ui->btnRefreshVersions->setEnabled(true);
     });
@@ -56,6 +77,60 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     connect(ui->btnRefreshVersions, &QPushButton::clicked, this, &MainWindow::loadVersions);
+
+    connect(ui->comboVersions, &QComboBox::currentIndexChanged, this, [this](int index) {
+        if (index >= 0) {
+            m_settings.setSelectedVersion(ui->comboVersions->currentData().toString());
+            m_settings.save();
+        }
+    });
+
+    connect(ui->btnLaunch, &QPushButton::clicked, this, [this]() {
+        int index = ui->comboVersions->currentIndex();
+        if (index < 0) return;
+
+        QString versionId = ui->comboVersions->currentData().toString();
+        QString versionUrl = ui->comboVersions->itemData(index, Qt::UserRole + 1).toString();
+        QString username = ui->editUsername->text();
+
+        auto *launcher = new GameLauncher(m_settings, this);
+
+        connect(launcher, &GameLauncher::statusChanged, this, [this](const QString &st) {
+            ui->lblStatus->setText(st);
+        });
+
+        connect(launcher, &GameLauncher::progressChanged, this, [this](int curr, int total) {
+            ui->progressBar->setVisible(true);
+            if (total > 0) {
+                ui->progressBar->setMinimum(0);
+                ui->progressBar->setMaximum(total);
+                ui->progressBar->setValue(curr);
+            } else {
+                ui->progressBar->setMinimum(0);
+                ui->progressBar->setMaximum(0);
+            }
+        });
+
+        connect(launcher, &GameLauncher::gameStarted, this, [this]() {
+            ui->lblStatus->setText("Игра запущена!");
+            ui->progressBar->setVisible(false);
+            ui->btnLaunch->setEnabled(true);
+        });
+
+        connect(launcher, &GameLauncher::gameExited, this, [this](int code) {
+            ui->lblStatus->setText(QString("Игра завершена (код %1)").arg(code));
+            ui->btnLaunch->setEnabled(true);
+        });
+
+        connect(launcher, &GameLauncher::errorOccurred, this, [this](const QString &err) {
+            ui->lblStatus->setText("Ошибка: " + err);
+            ui->progressBar->setVisible(false);
+            ui->btnLaunch->setEnabled(true);
+        });
+
+        ui->btnLaunch->setEnabled(false);
+        launcher->launch(versionId, versionUrl, username);
+    });
 
     loadVersions();
 }

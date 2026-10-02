@@ -28,6 +28,8 @@ set(CORE_SOURCES
     src/core/downloader/downloader.cpp
     src/core/launcher/versionmanager.h
     src/core/launcher/versionmanager.cpp
+    src/core/launcher/gamelauncher.h
+    src/core/launcher/gamelauncher.cpp
 )
 
 set(UI_SOURCES

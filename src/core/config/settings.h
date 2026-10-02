@@ -27,7 +27,23 @@ public:
     void save();
     void load();
 
+    bool showSnapshots() const;
+    void setShowSnapshots(bool show);
+
+    bool showBetas() const;
+    void setShowBetas(bool show);
+
+    bool showAlphas() const;
+    void setShowAlphas(bool show);
+
+    QString selectedVersion() const;
+    void setSelectedVersion(const QString &ver);
+
 private:
+    bool m_showSnapshots = false;
+    bool m_showBetas = false;
+    bool m_showAlphas = false;
+    QString m_selectedVersion;
     int m_minRam = 1024;
     int m_maxRam = 4096;
     int m_windowWidth = 854;

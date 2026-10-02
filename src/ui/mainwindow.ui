@@ -217,135 +217,181 @@
                             <attribute name="title">
                                 <string>Настройки</string>
                             </attribute>
-                            <layout class="QFormLayout" name="formLayoutSettings">
-                                <item row="0" column="0">
-                                    <widget class="QLabel" name="lblMinRam">
-                                        <property name="text">
-                                            <string>Мин. RAM (МБ):</string>
+                            <layout class="QVBoxLayout" name="verticalLayoutSettings">
+                                <item>
+                                    <widget class="QGroupBox" name="groupVersionFilter">
+                                        <property name="title">
+                                            <string>Отображение версий</string>
                                         </property>
+                                        <layout class="QHBoxLayout" name="horizontalLayoutFilters">
+                                            <item>
+                                                <widget class="QCheckBox" name="chkShowSnapshots">
+                                                    <property name="text">
+                                                        <string>Снапшоты / Экспериментальные</string>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                            <item>
+                                                <widget class="QCheckBox" name="chkShowBetas">
+                                                    <property name="text">
+                                                        <string>Старые Beta</string>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                            <item>
+                                                <widget class="QCheckBox" name="chkShowAlphas">
+                                                    <property name="text">
+                                                        <string>Старые Alpha</string>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                        </layout>
                                     </widget>
                                 </item>
-                                <item row="0" column="1">
-                                    <widget class="QSpinBox" name="spinMinRam">
-                                        <property name="minimum">
-                                            <number>512</number>
+                                <item>
+                                    <widget class="QGroupBox" name="groupGameSettings">
+                                        <property name="title">
+                                            <string>Параметры запуска</string>
                                         </property>
-                                        <property name="maximum">
-                                            <number>65536</number>
-                                        </property>
-                                        <property name="singleStep">
-                                            <number>512</number>
-                                        </property>
-                                        <property name="value">
-                                            <number>1024</number>
-                                        </property>
+                                        <layout class="QFormLayout" name="formLayoutSettings">
+                                            <item row="0" column="0">
+                                                <widget class="QLabel" name="lblMinRam">
+                                                    <property name="text">
+                                                        <string>Мин. RAM (МБ):</string>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                            <item row="0" column="1">
+                                                <widget class="QSpinBox" name="spinMinRam">
+                                                    <property name="minimum">
+                                                        <number>512</number>
+                                                    </property>
+                                                    <property name="maximum">
+                                                        <number>65536</number>
+                                                    </property>
+                                                    <property name="singleStep">
+                                                        <number>512</number>
+                                                    </property>
+                                                    <property name="value">
+                                                        <number>1024</number>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                            <item row="1" column="0">
+                                                <widget class="QLabel" name="lblMaxRam">
+                                                    <property name="text">
+                                                        <string>Макс. RAM (МБ):</string>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                            <item row="1" column="1">
+                                                <widget class="QSpinBox" name="spinMaxRam">
+                                                    <property name="minimum">
+                                                        <number>1024</number>
+                                                    </property>
+                                                    <property name="maximum">
+                                                        <number>65536</number>
+                                                    </property>
+                                                    <property name="singleStep">
+                                                        <number>512</number>
+                                                    </property>
+                                                    <property name="value">
+                                                        <number>4096</number>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                            <item row="2" column="0">
+                                                <widget class="QLabel" name="lblWindowWidth">
+                                                    <property name="text">
+                                                        <string>Ширина окна:</string>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                            <item row="2" column="1">
+                                                <widget class="QSpinBox" name="spinWidth">
+                                                    <property name="maximum">
+                                                        <number>7680</number>
+                                                    </property>
+                                                    <property name="value">
+                                                        <number>854</number>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                            <item row="3" column="0">
+                                                <widget class="QLabel" name="lblWindowHeight">
+                                                    <property name="text">
+                                                        <string>Высота окна:</string>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                            <item row="3" column="1">
+                                                <widget class="QSpinBox" name="spinHeight">
+                                                    <property name="maximum">
+                                                        <number>4320</number>
+                                                    </property>
+                                                    <property name="value">
+                                                        <number>480</number>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                            <item row="4" column="0">
+                                                <widget class="QLabel" name="lblJavaPath">
+                                                    <property name="text">
+                                                        <string>Путь к Java:</string>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                            <item row="4" column="1">
+                                                <layout class="QHBoxLayout" name="horizontalLayoutJava">
+                                                    <item>
+                                                        <widget class="QLineEdit" name="editJavaPath"/>
+                                                    </item>
+                                                    <item>
+                                                        <widget class="QPushButton" name="btnBrowseJava">
+                                                            <property name="text">
+                                                                <string>Обзор...</string>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                </layout>
+                                            </item>
+                                            <item row="5" column="0">
+                                                <widget class="QLabel" name="lblGameDir">
+                                                    <property name="text">
+                                                        <string>Папка игры:</string>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                            <item row="5" column="1">
+                                                <layout class="QHBoxLayout" name="horizontalLayoutGameDir">
+                                                    <item>
+                                                        <widget class="QLineEdit" name="editGameDir"/>
+                                                    </item>
+                                                    <item>
+                                                        <widget class="QPushButton" name="btnBrowseGameDir">
+                                                            <property name="text">
+                                                                <string>Обзор...</string>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                </layout>
+                                            </item>
+                                        </layout>
                                     </widget>
                                 </item>
-                                <item row="1" column="0">
-                                    <widget class="QLabel" name="lblMaxRam">
-                                        <property name="text">
-                                            <string>Макс. RAM (МБ):</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="1" column="1">
-                                    <widget class="QSpinBox" name="spinMaxRam">
-                                        <property name="minimum">
-                                            <number>1024</number>
-                                        </property>
-                                        <property name="maximum">
-                                            <number>65536</number>
-                                        </property>
-                                        <property name="singleStep">
-                                            <number>512</number>
-                                        </property>
-                                        <property name="value">
-                                            <number>4096</number>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="2" column="0">
-                                    <widget class="QLabel" name="lblWindowWidth">
-                                        <property name="text">
-                                            <string>Ширина окна:</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="2" column="1">
-                                    <widget class="QSpinBox" name="spinWidth">
-                                        <property name="maximum">
-                                            <number>7680</number>
-                                        </property>
-                                        <property name="value">
-                                            <number>854</number>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="3" column="0">
-                                    <widget class="QLabel" name="lblWindowHeight">
-                                        <property name="text">
-                                            <string>Высота окна:</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="3" column="1">
-                                    <widget class="QSpinBox" name="spinHeight">
-                                        <property name="maximum">
-                                            <number>4320</number>
-                                        </property>
-                                        <property name="value">
-                                            <number>480</number>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="4" column="0">
-                                    <widget class="QLabel" name="lblJavaPath">
-                                        <property name="text">
-                                            <string>Путь к Java:</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="4" column="1">
-                                    <layout class="QHBoxLayout" name="horizontalLayoutJava">
-                                        <item>
-                                            <widget class="QLineEdit" name="editJavaPath"/>
-                                        </item>
-                                        <item>
-                                            <widget class="QPushButton" name="btnBrowseJava">
-                                                <property name="text">
-                                                    <string>Обзор...</string>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                    </layout>
-                                </item>
-                                <item row="5" column="0">
-                                    <widget class="QLabel" name="lblGameDir">
-                                        <property name="text">
-                                            <string>Папка игры:</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="5" column="1">
-                                    <layout class="QHBoxLayout" name="horizontalLayoutGameDir">
-                                        <item>
-                                            <widget class="QLineEdit" name="editGameDir"/>
-                                        </item>
-                                        <item>
-                                            <widget class="QPushButton" name="btnBrowseGameDir">
-                                                <property name="text">
-                                                    <string>Обзор...</string>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                    </layout>
-                                </item>
-                                <item row="6" column="1">
+                                <item>
                                     <widget class="QPushButton" name="btnSaveSettings">
                                         <property name="text">
                                             <string>Сохранить настройки</string>
                                         </property>
                                     </widget>
+                                </item>
+                                <item>
+                                    <spacer name="verticalSpacerSettings">
+                                        <property name="orientation">
+                                            <enum>Qt::Vertical</enum>
+                                        </property>
+                                    </spacer>
                                 </item>
                             </layout>
                         </widget>
