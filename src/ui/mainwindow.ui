@@ -223,27 +223,56 @@
                                         <property name="title">
                                             <string>Отображение версий</string>
                                         </property>
-                                        <layout class="QHBoxLayout" name="horizontalLayoutFilters">
+                                        <layout class="QVBoxLayout" name="verticalLayoutFilterContainer">
                                             <item>
-                                                <widget class="QCheckBox" name="chkShowSnapshots">
-                                                    <property name="text">
-                                                        <string>Снапшоты / Экспериментальные</string>
-                                                    </property>
-                                                </widget>
+                                                <layout class="QHBoxLayout" name="horizontalLayoutVanillaFilters">
+                                                    <item>
+                                                        <widget class="QCheckBox" name="chkShowSnapshots">
+                                                            <property name="text">
+                                                                <string>Снапшоты</string>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                    <item>
+                                                        <widget class="QCheckBox" name="chkShowBetas">
+                                                            <property name="text">
+                                                                <string>Старые Beta</string>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                    <item>
+                                                        <widget class="QCheckBox" name="chkShowAlphas">
+                                                            <property name="text">
+                                                                <string>Старые Alpha</string>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                </layout>
                                             </item>
                                             <item>
-                                                <widget class="QCheckBox" name="chkShowBetas">
-                                                    <property name="text">
-                                                        <string>Старые Beta</string>
-                                                    </property>
-                                                </widget>
-                                            </item>
-                                            <item>
-                                                <widget class="QCheckBox" name="chkShowAlphas">
-                                                    <property name="text">
-                                                        <string>Старые Alpha</string>
-                                                    </property>
-                                                </widget>
+                                                <layout class="QHBoxLayout" name="horizontalLayoutModFilters">
+                                                    <item>
+                                                        <widget class="QCheckBox" name="chkShowFabric">
+                                                            <property name="text">
+                                                                <string>Fabric</string>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                    <item>
+                                                        <widget class="QCheckBox" name="chkShowForge">
+                                                            <property name="text">
+                                                                <string>Forge</string>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                    <item>
+                                                        <widget class="QCheckBox" name="chkShowNeoForge">
+                                                            <property name="text">
+                                                                <string>NeoForge</string>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                </layout>
                                             </item>
                                         </layout>
                                     </widget>

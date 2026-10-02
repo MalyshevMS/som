@@ -39,7 +39,19 @@ public:
     QString selectedVersion() const;
     void setSelectedVersion(const QString &ver);
 
+    bool showFabric() const;
+    void setShowFabric(bool show);
+
+    bool showForge() const;
+    void setShowForge(bool show);
+
+    bool showNeoForge() const;
+    void setShowNeoForge(bool show);
+
 private:
+    bool m_showFabric = false;
+    bool m_showForge = false;
+    bool m_showNeoForge = false;
     bool m_showSnapshots = false;
     bool m_showBetas = false;
     bool m_showAlphas = false;

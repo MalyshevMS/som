@@ -2,17 +2,16 @@
 #define VERSIONMANAGER_H
 
 #include <QObject>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 #include <QList>
-#include <QString>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QJsonDocument>
+#include <QStringList>
 
 struct VersionInfo {
     QString id;
     QString type;
     QString url;
-    QString releaseTime;
+    QString gameVersion;
 };
 
 class VersionManager : public QObject {
@@ -20,18 +19,22 @@ class VersionManager : public QObject {
 
 public:
     explicit VersionManager(QObject *parent = nullptr);
+    ~VersionManager();
 
-    void fetchVersionManifest();
-
-    const QList<VersionInfo>& versions() const { return m_versions; }
+    void fetchVersions();
 
 signals:
-    void manifestLoaded(const QList<VersionInfo> &versions);
+    void versionsLoaded(const QList<VersionInfo> &versions);
     void errorOccurred(const QString &error);
 
+private slots:
+    void onVanillaManifestDownloaded();
+    void onFabricVersionsDownloaded();
+
 private:
-    QList<VersionInfo> m_versions;
-    const QString MANIFEST_URL = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
+    QNetworkAccessManager *m_networkManager = nullptr;
+    QList<VersionInfo> m_allVersions;
+    QStringList m_vanillaReleases;
 };
 
 #endif // VERSIONMANAGER_H

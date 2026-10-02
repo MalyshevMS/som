@@ -16,10 +16,34 @@ MainWindow::MainWindow(QWidget *parent)
     ui->spinHeight->setValue(m_settings.windowHeight());
     ui->editJavaPath->setText(m_settings.javaPath());
     ui->editGameDir->setText(m_settings.gameDirectory());
+
     ui->chkShowSnapshots->setChecked(m_settings.showSnapshots());
     ui->chkShowBetas->setChecked(m_settings.showBetas());
     ui->chkShowAlphas->setChecked(m_settings.showAlphas());
+    ui->chkShowFabric->setChecked(m_settings.showFabric());
+    ui->chkShowForge->setChecked(m_settings.showForge());
+    ui->chkShowNeoForge->setChecked(m_settings.showNeoForge());
 
+    auto onFilterToggled = [this]() {
+        m_settings.setShowSnapshots(ui->chkShowSnapshots->isChecked());
+        m_settings.setShowBetas(ui->chkShowBetas->isChecked());
+        m_settings.setShowAlphas(ui->chkShowAlphas->isChecked());
+        m_settings.setShowFabric(ui->chkShowFabric->isChecked());
+        m_settings.setShowForge(ui->chkShowForge->isChecked());
+        m_settings.setShowNeoForge(ui->chkShowNeoForge->isChecked());
+        m_settings.save();
+
+        loadVersions();
+    };
+
+    connect(ui->chkShowSnapshots, &QCheckBox::toggled, this, onFilterToggled);
+    connect(ui->chkShowBetas, &QCheckBox::toggled, this, onFilterToggled);
+    connect(ui->chkShowAlphas, &QCheckBox::toggled, this, onFilterToggled);
+    connect(ui->chkShowFabric, &QCheckBox::toggled, this, onFilterToggled);
+    connect(ui->chkShowForge, &QCheckBox::toggled, this, onFilterToggled);
+    connect(ui->chkShowNeoForge, &QCheckBox::toggled, this, onFilterToggled);
+
+    // Диалоги выбора путей
     connect(ui->btnBrowseJava, &QPushButton::clicked, this, [this]() {
         QString path = QFileDialog::getOpenFileName(this, "Выберите файл Java");
         if (!path.isEmpty()) ui->editJavaPath->setText(path);
@@ -40,7 +64,7 @@ MainWindow::MainWindow(QWidget *parent)
         QMessageBox::information(this, "Настройки", "Настройки сохранены!");
     });
 
-    connect(&m_versionManager, &VersionManager::manifestLoaded, this, [this](const QList<VersionInfo> &versions) {
+    connect(&m_versionManager, &VersionManager::versionsLoaded, this, [this](const QList<VersionInfo> &versions) {
         QString previousSelection = ui->comboVersions->currentData().toString();
         if (previousSelection.isEmpty()) {
             previousSelection = m_settings.selectedVersion();
@@ -49,10 +73,22 @@ MainWindow::MainWindow(QWidget *parent)
         ui->comboVersions->clear();
         for (const auto &ver : versions) {
             bool show = false;
-            if (ver.type == "release") show = true;
-            else if (ver.type == "snapshot" && ui->chkShowSnapshots->isChecked()) show = true;
-            else if (ver.type == "old_beta" && ui->chkShowBetas->isChecked()) show = true;
-            else if (ver.type == "old_alpha" && ui->chkShowAlphas->isChecked()) show = true;
+
+            if (ver.type == "release") {
+                show = true;
+            } else if (ver.type == "snapshot" && ui->chkShowSnapshots->isChecked()) {
+                show = true;
+            } else if (ver.type == "old_beta" && ui->chkShowBetas->isChecked()) {
+                show = true;
+            } else if (ver.type == "old_alpha" && ui->chkShowAlphas->isChecked()) {
+                show = true;
+            } else if (ver.type == "fabric" && ui->chkShowFabric->isChecked()) {
+                show = true;
+            } else if (ver.type == "forge" && ui->chkShowForge->isChecked()) {
+                show = true;
+            } else if (ver.type == "neoforge" && ui->chkShowNeoForge->isChecked()) {
+                show = true;
+            }
 
             if (show) {
                 QString label = (ver.type == "release") ? ver.id : QString("%1 (%2)").arg(ver.id, ver.type);
@@ -137,7 +173,7 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::loadVersions() {
     ui->lblStatus->setText("Загрузка списка версий...");
     ui->btnRefreshVersions->setEnabled(false);
-    m_versionManager.fetchVersionManifest();
+    m_versionManager.fetchVersions();
 }
 
 MainWindow::~MainWindow() {

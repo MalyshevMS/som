@@ -39,6 +39,15 @@ void Settings::setShowAlphas(bool show) { m_showAlphas = show; }
 QString Settings::selectedVersion() const { return m_selectedVersion; }
 void Settings::setSelectedVersion(const QString &ver) { m_selectedVersion = ver; }
 
+bool Settings::showFabric() const { return m_showFabric; }
+void Settings::setShowFabric(bool show) { m_showFabric = show; }
+
+bool Settings::showForge() const { return m_showForge; }
+void Settings::setShowForge(bool show) { m_showForge = show; }
+
+bool Settings::showNeoForge() const { return m_showNeoForge; }
+void Settings::setShowNeoForge(bool show) { m_showNeoForge = show; }
+
 void Settings::save() {
     QSettings s;
     s.setValue("game/minRam", m_minRam);
@@ -50,6 +59,9 @@ void Settings::save() {
     s.setValue("game/showSnapshots", m_showSnapshots);
     s.setValue("game/showBetas", m_showBetas);
     s.setValue("game/showAlphas", m_showAlphas);
+    s.setValue("game/showFabric", m_showFabric);
+    s.setValue("game/showForge", m_showForge);
+    s.setValue("game/showNeoForge", m_showNeoForge);
     s.setValue("game/selectedVersion", m_selectedVersion);
 }
 
@@ -64,5 +76,8 @@ void Settings::load() {
     m_showSnapshots = s.value("game/showSnapshots", false).toBool();
     m_showBetas = s.value("game/showBetas", false).toBool();
     m_showAlphas = s.value("game/showAlphas", false).toBool();
+    m_showFabric = s.value("game/showFabric", false).toBool();
+    m_showForge = s.value("game/showForge", false).toBool();
+    m_showNeoForge = s.value("game/showNeoForge", false).toBool();
     m_selectedVersion = s.value("game/selectedVersion", "").toString();
 }
