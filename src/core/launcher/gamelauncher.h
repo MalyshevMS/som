@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QProcess>
+#include <QJsonObject>
 #include "../config/settings.h"
 #include "../downloader/downloader.h"
 
@@ -24,7 +25,8 @@ signals:
 
 private:
     void parseAndDownloadProfile(const QString &profileJsonPath, const QString &versionId, const QString &username);
-    void executeJavaProcess(const QString &versionId, const QString &mainClass, const QStringList &libraries, const QString &username);
+    void downloadAssets(const QJsonObject &assetIndexRoot, const QString &versionId, const QString &assetIndexId, const QString &mainClass, const QStringList &libraries, const QString &username, QList<DownloadTask> downloadTasks);
+    void executeJavaProcess(const QString &versionId, const QString &assetsIndexId, const QString &mainClass, const QStringList &libraries, const QString &username);
 
     Settings m_settings;
     Downloader *m_downloader = nullptr;

@@ -10,7 +10,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     setWindowTitle("SOM Launcher");
 
-    // Загрузка сохранённых настроек
     ui->spinMinRam->setValue(m_settings.minRamMb());
     ui->spinMaxRam->setValue(m_settings.maxRamMb());
     ui->spinWidth->setValue(m_settings.windowWidth());

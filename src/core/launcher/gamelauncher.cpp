@@ -87,9 +87,66 @@ void GameLauncher::parseAndDownloadProfile(const QString &profileJsonPath, const
         }
     }
 
+    // 3. Скачивание индекса ассетов
+    QJsonObject assetIndexObj = root["assetIndex"].toObject();
+    QString assetIndexUrl = assetIndexObj["url"].toString();
+    QString assetIndexId = assetIndexObj["id"].toString(versionId);
+
+    if (!assetIndexUrl.isEmpty()) {
+        QString indexFilePath = m_settings.gameDirectory() + "/assets/indexes/" + assetIndexId + ".json";
+
+        if (!QFile::exists(indexFilePath)) {
+            emit statusChanged("Загрузка индекса ресурсов...");
+            m_downloader->disconnect(this);
+            connect(m_downloader, &Downloader::fileFinished, this, [this, indexFilePath, assetIndexId, versionId, mainClass, classpathList, username, downloadTasks](const QString &, bool success) {
+                if (!success) {
+                    emit errorOccurred("Не удалось загрузить индекс ресурсов.");
+                    return;
+                }
+
+                QFile idxFile(indexFilePath);
+                if (idxFile.open(QIODevice::ReadOnly)) {
+                    QJsonObject idxRoot = QJsonDocument::fromJson(idxFile.readAll()).object();
+                    downloadAssets(idxRoot, versionId, assetIndexId, mainClass, classpathList, username, downloadTasks);
+                }
+            });
+
+            m_downloader->downloadFile(QUrl(assetIndexUrl), indexFilePath);
+            return;
+        } else {
+            QFile idxFile(indexFilePath);
+            if (idxFile.open(QIODevice::ReadOnly)) {
+                QJsonObject idxRoot = QJsonDocument::fromJson(idxFile.readAll()).object();
+                downloadAssets(idxRoot, versionId, assetIndexId, mainClass, classpathList, username, downloadTasks);
+                return;
+            }
+        }
+    }
+
+
+    downloadAssets(QJsonObject(), versionId, versionId, mainClass, classpathList, username, downloadTasks);
+}
+
+void GameLauncher::downloadAssets(const QJsonObject &assetIndexRoot, const QString &versionId, const QString &assetIndexId, const QString &mainClass, const QStringList &libraries, const QString &username, QList<DownloadTask> downloadTasks) {
+    QJsonObject objects = assetIndexRoot["objects"].toObject();
+
+    for (auto it = objects.begin(); it != objects.end(); ++it) {
+        QJsonObject obj = it.value().toObject();
+        QString hash = obj["hash"].toString();
+        if (hash.length() < 2) continue;
+
+        QString prefix = hash.left(2);
+        QString assetPath = m_settings.gameDirectory() + "/assets/objects/" + prefix + "/" + hash;
+
+        if (!QFile::exists(assetPath)) {
+            QString assetUrl = QString("https://resources.download.minecraft.net/%1/%2").arg(prefix, hash);
+            downloadTasks.append({QUrl(assetUrl), assetPath, hash});
+        }
+    }
+
     if (downloadTasks.isEmpty()) {
-        emit statusChanged("Все файлы загружены. Запуск игры...");
-        executeJavaProcess(versionId, mainClass, classpathList, username);
+        emit statusChanged("Все ресурсы загружены. Запуск игры...");
+        executeJavaProcess(versionId, assetIndexId, mainClass, libraries, username);
         return;
     }
 
@@ -97,21 +154,21 @@ void GameLauncher::parseAndDownloadProfile(const QString &profileJsonPath, const
 
     connect(m_downloader, &Downloader::batchProgress, this, [this](int current, int total) {
         emit progressChanged(current, total);
-        emit statusChanged(QString("Загрузка ресурсов: %1 из %2 файлов...").arg(current).arg(total));
+        emit statusChanged(QString("Загрузка ресурсов (звуки, текстуры): %1 из %2...").arg(current).arg(total));
     });
 
-    connect(m_downloader, &Downloader::batchFinished, this, [this, versionId, mainClass, classpathList, username]() {
+    connect(m_downloader, &Downloader::batchFinished, this, [this, versionId, assetIndexId, mainClass, libraries, username]() {
         emit statusChanged("Запуск игры...");
-        executeJavaProcess(versionId, mainClass, classpathList, username);
+        executeJavaProcess(versionId, assetIndexId, mainClass, libraries, username);
     });
 
-    emit statusChanged(QString("Подготовка к загрузке %1 файлов...").arg(downloadTasks.size()));
+    emit statusChanged(QString("Подготовка к загрузке %1 ресурсов...").arg(downloadTasks.size()));
     emit progressChanged(0, downloadTasks.size());
 
-    m_downloader->downloadBatch(downloadTasks, 8);
+    m_downloader->downloadBatch(downloadTasks, 16); // Загружаем ресурсы в 16 потоков
 }
 
-void GameLauncher::executeJavaProcess(const QString &versionId, const QString &mainClass, const QStringList &libraries, const QString &username) {
+void GameLauncher::executeJavaProcess(const QString &versionId, const QString &assetsIndexId, const QString &mainClass, const QStringList &libraries, const QString &username) {
     m_gameProcess = new QProcess(this);
 
     QString java = m_settings.javaPath().isEmpty() ? "java" : m_settings.javaPath();
@@ -127,23 +184,20 @@ void GameLauncher::executeJavaProcess(const QString &versionId, const QString &m
     QString classpath = libraries.join(cpSeparator);
 
     QStringList args;
-
     args << QString("-Xms%1M").arg(m_settings.minRamMb());
     args << QString("-Xmx%1M").arg(m_settings.maxRamMb());
     args << QString("-Djava.library.path=%1").arg(nativeDir);
     args << "-cp" << classpath;
-
     args << mainClass;
 
     QString player = username.trimmed().isEmpty() ? "Player" : username.trimmed();
-
+    
     args << "--username" << player;
     args << "--version" << versionId;
     args << "--gameDir" << m_settings.gameDirectory();
     args << "--assetsDir" << (m_settings.gameDirectory() + "/assets");
-    args << "--assetIndex" << versionId;
-
-    // Авторизационные заглушки для оффлайн-запуска
+    args << "--assetIndex" << assetsIndexId; // Передаём верный id индекса ассетов
+    
     args << "--accessToken" << "0";
     args << "--uuid" << "00000000-0000-0000-0000-000000000000";
     args << "--userType" << "legacy";
