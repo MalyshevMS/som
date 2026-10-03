@@ -5,7 +5,7 @@
 #include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent), m_versionManager(m_settings)
     , ui(new Ui::MainWindow) {
     ui->setupUi(this);
     setWindowTitle("SOM Launcher");
@@ -43,7 +43,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->chkShowForge, &QCheckBox::toggled, this, onFilterToggled);
     connect(ui->chkShowNeoForge, &QCheckBox::toggled, this, onFilterToggled);
 
-    // Диалоги выбора путей
     connect(ui->btnBrowseJava, &QPushButton::clicked, this, [this]() {
         QString path = QFileDialog::getOpenFileName(this, "Выберите файл Java");
         if (!path.isEmpty()) ui->editJavaPath->setText(path);

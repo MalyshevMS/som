@@ -5,8 +5,8 @@
 #include <QUrl>
 #include <QNetworkRequest>
 
-VersionManager::VersionManager(QObject *parent)
-    : QObject(parent), m_networkManager(new QNetworkAccessManager(this)) {}
+VersionManager::VersionManager(const Settings &settings, QObject *parent)
+    : QObject(parent), m_networkManager(new QNetworkAccessManager(this)), m_settings(settings) {}
 
 VersionManager::~VersionManager() {}
 
@@ -34,6 +34,14 @@ void VersionManager::onVanillaManifestDownloaded() {
     QByteArray data = reply->readAll();
     reply->deleteLater();
 
+    QString manifestPath = m_settings.gameDirectory() + "/version_manifest_v2.json";
+    QDir().mkpath(m_settings.gameDirectory());
+    QFile manifestFile(manifestPath);
+    if (manifestFile.open(QIODevice::WriteOnly)) {
+        manifestFile.write(data);
+        manifestFile.close();
+    }
+
     QJsonDocument doc = QJsonDocument::fromJson(data);
     QJsonObject root = doc.object();
     QJsonArray versionsArray = root["versions"].toArray();
@@ -53,11 +61,15 @@ void VersionManager::onVanillaManifestDownloaded() {
         }
     }
 
-    QUrl fabricUrl("https://meta.fabricmc.net/v2/versions/loader");
-    QNetworkRequest request(fabricUrl);
-    QNetworkReply *fabricReply = m_networkManager->get(request);
+    fetchFabricVersions();
+}
 
-    connect(fabricReply, &QNetworkReply::finished, this, &VersionManager::onFabricVersionsDownloaded);
+void VersionManager::fetchFabricVersions() {
+    QUrl url("https://meta.fabricmc.net/v2/versions/loader");
+    QNetworkRequest request(url);
+    QNetworkReply *reply = m_networkManager->get(request);
+
+    connect(reply, &QNetworkReply::finished, this, &VersionManager::onFabricVersionsDownloaded);
 }
 
 void VersionManager::onFabricVersionsDownloaded() {
@@ -72,7 +84,6 @@ void VersionManager::onFabricVersionsDownloaded() {
         QJsonDocument doc = QJsonDocument::fromJson(data);
         QJsonArray loadersArray = doc.array();
 
-        // Находим последнюю стабильную версию Fabric Loader
         QString latestLoaderVersion;
         for (const QJsonValue &val : loadersArray) {
             QJsonObject loaderObj = val.toObject();
@@ -106,6 +117,64 @@ void VersionManager::onFabricVersionsDownloaded() {
                             break;
                         }
                     }
+                }
+            }
+        }
+    }
+
+    reply->deleteLater();
+
+    fetchForgeVersions();
+}
+
+void VersionManager::fetchForgeVersions() {
+    QUrl url("https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json");
+    QNetworkRequest request(url);
+
+    QNetworkReply *reply = m_networkManager->get(request);
+    connect(reply, &QNetworkReply::finished, this, &VersionManager::onForgeVersionsDownloaded);
+}
+
+void VersionManager::onForgeVersionsDownloaded() {
+        auto *reply = qobject_cast<QNetworkReply*>(sender());
+    if (!reply) {
+        emit versionsLoaded(m_allVersions);
+        return;
+    }
+
+    if (reply->error() == QNetworkReply::NoError) {
+        QByteArray data = reply->readAll();
+        QJsonDocument doc = QJsonDocument::fromJson(data);
+        QJsonObject promos = doc.object()["promos"].toObject();
+
+        QMap<QString, QString> recommendedForge;
+
+        for (auto it = promos.begin(); it != promos.end(); it++) {
+            QString key = it.key();
+            if (key.endsWith("-recommended") || key.endsWith("-latest")) {
+                QString gameVer = key.section('-', 0, 0);
+                QString forgeVer = it.value().toVariant().toString();
+
+                if (!recommendedForge.contains(gameVer) || key.endsWith("-recommended")) {
+                    recommendedForge[gameVer] = forgeVer;
+                }
+            }
+        }
+
+        for (auto it = recommendedForge.begin(); it != recommendedForge.end(); ++it) {
+            QString gameVer = it.key();
+            QString forgeVer = it.value();
+
+            VersionInfo forgeInfo;
+            forgeInfo.id = QString("%1-forge-%2").arg(gameVer, forgeVer);
+            forgeInfo.type = "forge";
+            forgeInfo.gameVersion = gameVer;
+            forgeInfo.url = QString("https://maven.minecraftforge.net/net/minecraftforge/forge/%1-%2/forge-%1-%2-installer.jar").arg(gameVer, forgeVer);
+
+            for (int i = 0; i < m_allVersions.size(); i++) {
+                if (m_allVersions[i].id == gameVer) {
+                    m_allVersions.insert(i + 1, forgeInfo);
+                    break;
                 }
             }
         }

@@ -104,7 +104,6 @@ void GameLauncher::parseAndDownloadProfile(const QString &profileJsonPath, const
 
             emit statusChanged(QString("Загрузка базового ванильного профиля %1...").arg(baseVersionId));
 
-            // Скачиваем базовый JSON по найденному URL
             m_downloader->disconnect(this);
             connect(m_downloader, &Downloader::fileFinished, this, [this, profileJsonPath, versionId, username](const QString &, bool success) {
                 if (!success) {

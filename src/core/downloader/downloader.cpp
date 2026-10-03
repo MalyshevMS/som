@@ -37,7 +37,7 @@ void Downloader::processQueue() {
 
         QNetworkRequest request(task.url);
         request.setAttribute(QNetworkRequest::User, task.destinationPath);
-        request.setHeader(QNetworkRequest::UserAgentHeader, "SOM/1.0");
+        request.setHeader(QNetworkRequest::UserAgentHeader, "orgcincorp/1.0");
 
         QNetworkReply *reply = m_netManager.get(request);
 
