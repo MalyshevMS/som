@@ -72,6 +72,7 @@ void VersionManager::onFabricVersionsDownloaded() {
         QJsonDocument doc = QJsonDocument::fromJson(data);
         QJsonArray loadersArray = doc.array();
 
+        // Находим последнюю стабильную версию Fabric Loader
         QString latestLoaderVersion;
         for (const QJsonValue &val : loadersArray) {
             QJsonObject loaderObj = val.toObject();
@@ -99,7 +100,12 @@ void VersionManager::onFabricVersionsDownloaded() {
                     fabricVer.url = QString("https://meta.fabricmc.net/v2/versions/loader/%1/%2/profile/json")
                                         .arg(gameVer, latestLoaderVersion);
 
-                    m_allVersions.append(fabricVer);
+                    for (int i = 0; i < m_allVersions.size(); ++i) {
+                        if (m_allVersions[i].id == gameVer) {
+                            m_allVersions.insert(i + 1, fabricVer);
+                            break;
+                        }
+                    }
                 }
             }
         }
